@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#a9dce2" />
+    <meta name="description" content="和奶泡一起在草地上走一走。" />
+    <title>奶泡的草地</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main id="scene" aria-label="奶泡的草地互动场景"></main>
+
+    <header class="brand">
+      <p class="eyebrow">NAIPAO'S LITTLE FIELD</p>
+      <h1>奶泡的草地</h1>
+    </header>
+
+    <div class="hint" aria-live="polite">
+      <span class="desktop-hint">点击草地或按方向键，让奶泡走一走</span>
+      <span class="mobile-hint">点一下草地，让奶泡走过去</span>
+    </div>
+
+    <button id="home-button" class="home-button" type="button" aria-label="让奶泡回到草地中央">
+      回到中央
+    </button>
+
+    <div id="loading" class="loading" role="status">
+      <div class="loading-dot"></div>
+      <span>奶泡正在来到草地……</span>
+    </div>
+
+    <noscript>请开启 JavaScript 后进入奶泡的草地。</noscript>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
