@@ -1,4 +1,5 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js";
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
 const root = document.querySelector("#scene");
 const loading = document.querySelector("#loading");
@@ -118,121 +119,48 @@ const player = {
   target: new THREE.Vector3(0, 0.77, 0),
   velocity: new THREE.Vector3(),
   speed: 3.2,
-  facing: 1,
-  sprite: null,
-  spriteBaseY: 2.25
+  model: null,
+  mixer: null,
+  walkAction: null,
+  yaw: 0
 };
 
-function makeCharacterTexture(image) {
-  const maxWidth = 900;
-  const scale = Math.min(1, maxWidth / image.naturalWidth);
-  const width = Math.max(1, Math.round(image.naturalWidth * scale));
-  const height = Math.max(1, Math.round(image.naturalHeight * scale));
-  const source = document.createElement("canvas");
-  source.width = width;
-  source.height = height;
-  const ctx = source.getContext("2d", { willReadFrequently: true });
-  ctx.drawImage(image, 0, 0, width, height);
-  const pixels = ctx.getImageData(0, 0, width, height);
-  const data = pixels.data;
-  const corners = [0, (width - 1) * 4, (height - 1) * width * 4, (height * width - 1) * 4];
-  const bg = corners.reduce((sum, index) => {
-    sum[0] += data[index];
-    sum[1] += data[index + 1];
-    sum[2] += data[index + 2];
-    return sum;
-  }, [0, 0, 0]).map((value) => value / corners.length);
-
-  const visited = new Uint8Array(width * height);
-  const queue = new Int32Array(width * height);
-  let head = 0;
-  let tail = 0;
-  const push = (x, y) => {
-    if (x < 0 || x >= width || y < 0 || y >= height) return;
-    const position = y * width + x;
-    if (visited[position]) return;
-    const index = position * 4;
-    const dr = data[index] - bg[0];
-    const dg = data[index + 1] - bg[1];
-    const db = data[index + 2] - bg[2];
-    const distance = Math.sqrt(dr * dr + dg * dg + db * db);
-    const max = Math.max(data[index], data[index + 1], data[index + 2]);
-    const min = Math.min(data[index], data[index + 1], data[index + 2]);
-    const lowChroma = max - min < 38;
-    if (distance > 48 || !lowChroma || max < 214) return;
-    visited[position] = 1;
-    queue[tail++] = position;
-  };
-
-  for (let x = 0; x < width; x += 1) {
-    push(x, 0);
-    push(x, height - 1);
-  }
-  for (let y = 0; y < height; y += 1) {
-    push(0, y);
-    push(width - 1, y);
-  }
-
-  while (head < tail) {
-    const position = queue[head++];
-    const x = position % width;
-    const y = Math.floor(position / width);
-    data[position * 4 + 3] = 0;
-    push(x + 1, y);
-    push(x - 1, y);
-    push(x, y + 1);
-    push(x, y - 1);
-  }
-
-  let minX = width;
-  let minY = height;
-  let maxX = 0;
-  let maxY = 0;
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      if (data[(y * width + x) * 4 + 3] > 8) {
-        minX = Math.min(minX, x);
-        minY = Math.min(minY, y);
-        maxX = Math.max(maxX, x);
-        maxY = Math.max(maxY, y);
+const loader = new GLTFLoader();
+loader.load(
+  "./assets/naipao-walk.glb",
+  (gltf) => {
+    const model = gltf.scene;
+    model.scale.setScalar(1.9);
+    model.rotation.y = 0;
+    model.traverse((node) => {
+      if (!node.isMesh) return;
+      node.castShadow = true;
+      node.receiveShadow = true;
+      if (node.material) {
+        node.material.envMapIntensity = 0.7;
+        node.material.needsUpdate = true;
       }
+    });
+    character.add(model);
+    player.model = model;
+
+    if (gltf.animations.length > 0) {
+      player.mixer = new THREE.AnimationMixer(model);
+      player.walkAction = player.mixer.clipAction(gltf.animations[0]);
+      player.walkAction.play();
+      player.walkAction.paused = true;
     }
+    loading.classList.add("is-hidden");
+  },
+  (progress) => {
+    if (!progress.total) return;
+    const percent = Math.min(99, Math.round((progress.loaded / progress.total) * 100));
+    loading.querySelector("span").textContent = `奶泡正在来到草地…… ${percent}%`;
+  },
+  () => {
+    loading.querySelector("span").textContent = "奶泡的 3D 模型没有加载成功，请刷新再试。";
   }
-
-  ctx.putImageData(pixels, 0, 0);
-  const padding = 12;
-  minX = Math.max(0, minX - padding);
-  minY = Math.max(0, minY - padding);
-  maxX = Math.min(width - 1, maxX + padding);
-  maxY = Math.min(height - 1, maxY + padding);
-  const crop = document.createElement("canvas");
-  crop.width = Math.max(1, maxX - minX + 1);
-  crop.height = Math.max(1, maxY - minY + 1);
-  crop.getContext("2d").drawImage(source, minX, minY, crop.width, crop.height, 0, 0, crop.width, crop.height);
-  return crop;
-}
-
-const image = new Image();
-image.src = "./assets/naipao.png";
-image.onload = () => {
-  const cutout = makeCharacterTexture(image);
-  const texture = new THREE.CanvasTexture(cutout);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-  const material = new THREE.SpriteMaterial({ map: texture, transparent: true, alphaTest: 0.08 });
-  const sprite = new THREE.Sprite(material);
-  const ratio = cutout.width / cutout.height;
-  const spriteHeight = 4.25;
-  sprite.scale.set(spriteHeight * ratio, spriteHeight, 1);
-  sprite.position.y = player.spriteBaseY;
-  sprite.castShadow = true;
-  character.add(sprite);
-  player.sprite = sprite;
-  loading.classList.add("is-hidden");
-};
-image.onerror = () => {
-  loading.querySelector("span").textContent = "奶泡的图片没有加载成功，请刷新再试。";
-};
+);
 
 const keys = new Set();
 window.addEventListener("keydown", (event) => {
@@ -278,7 +206,6 @@ function updateCameraFrustum() {
 
 function animate() {
   const delta = Math.min(clock.getDelta(), 0.05);
-  const elapsed = clock.elapsedTime;
   const input = new THREE.Vector3(
     Number(keys.has("ArrowRight") || keys.has("KeyD")) - Number(keys.has("ArrowLeft") || keys.has("KeyA")),
     0,
@@ -311,12 +238,15 @@ function animate() {
     player.target.copy(character.position);
   }
 
-  if (Math.abs(player.velocity.x) > 0.08) player.facing = player.velocity.x > 0 ? 1 : -1;
-  if (player.sprite) {
-    const baseWidth = Math.abs(player.sprite.scale.x);
-    player.sprite.scale.x = baseWidth * player.facing;
-    player.sprite.position.y = player.spriteBaseY + (moving ? Math.abs(Math.sin(elapsed * 8)) * 0.09 : Math.sin(elapsed * 2.2) * 0.025);
-    player.sprite.material.rotation = moving ? Math.sin(elapsed * 8) * 0.018 * player.facing : 0;
+  if (player.model && player.velocity.lengthSq() > 0.01) {
+    const targetYaw = Math.atan2(player.velocity.x, player.velocity.z);
+    const yawDifference = Math.atan2(Math.sin(targetYaw - player.yaw), Math.cos(targetYaw - player.yaw));
+    player.yaw += yawDifference * (1 - Math.exp(-delta * 11));
+    player.model.rotation.y = player.yaw;
+  }
+  if (player.mixer) {
+    player.mixer.update(delta);
+    player.walkAction.paused = !moving;
   }
   shadow.material.opacity = moving ? 0.16 : 0.22;
 
