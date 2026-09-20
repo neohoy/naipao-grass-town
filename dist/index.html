@@ -4,8 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#a9dce2" />
-    <meta name="description" content="和奶泡一起在草地上走一走。" />
-    <title>奶泡的草地</title>
+    <meta name="description" content="和奶泡一起逛一座小小的 3D 小镇。" />
+    <title>奶泡的小镇</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23f4b23c'/%3E%3Cpath d='M17 26c-6-8-2-15 4-12 4 2 5 7 5 11M47 26c6-8 2-15-4-12-4 2-5 7-5 11' fill='%23a95d1c'/%3E%3Ccircle cx='32' cy='35' r='18' fill='%23fff6e8'/%3E%3Cellipse cx='32' cy='42' rx='11' ry='8' fill='%23f6b59b'/%3E%3Ccircle cx='27' cy='34' r='2.5' fill='%232e241e'/%3E%3Ccircle cx='39' cy='34' r='2.5' fill='%232e241e'/%3E%3Ccircle cx='28' cy='42' r='1.5' fill='%23995735'/%3E%3Ccircle cx='36' cy='42' r='1.5' fill='%23995735'/%3E%3C/svg%3E" />
     <link rel="stylesheet" href="./styles.css" />
     <script type="importmap">
@@ -18,28 +18,28 @@
     </script>
   </head>
   <body>
-    <main id="scene" aria-label="奶泡的草地互动场景"></main>
+    <main id="scene" aria-label="奶泡的小镇互动场景"></main>
 
     <header class="brand">
-      <p class="eyebrow">NAIPAO'S LITTLE FIELD</p>
-      <h1>奶泡的草地</h1>
+      <p class="eyebrow">NAIPAO'S LITTLE TOWN</p>
+      <h1>奶泡的小镇</h1>
     </header>
 
     <div class="hint" aria-live="polite">
-      <span class="desktop-hint">点击草地或按方向键，让奶泡走一走</span>
-      <span class="mobile-hint">点一下草地，让奶泡走过去</span>
+      <span class="desktop-hint">点击道路或按方向键，带奶泡逛小镇</span>
+      <span class="mobile-hint">点一下空地，带奶泡逛小镇</span>
     </div>
 
-    <button id="home-button" class="home-button" type="button" aria-label="让奶泡回到草地中央">
+    <button id="home-button" class="home-button" type="button" aria-label="让奶泡回到小镇中央">
       回到中央
     </button>
 
     <div id="loading" class="loading" role="status">
       <div class="loading-dot"></div>
-      <span>奶泡正在来到草地……</span>
+      <span>奶泡正在来到小镇……</span>
     </div>
 
-    <noscript>请开启 JavaScript 后进入奶泡的草地。</noscript>
+    <noscript>请开启 JavaScript 后进入奶泡的小镇。</noscript>
     <script type="module" src="./main.js"></script>
   </body>
 </html>
