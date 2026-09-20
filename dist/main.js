@@ -8,7 +8,7 @@ const homeButton = document.querySelector("#home-button");
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xb9e3df);
-scene.fog = new THREE.Fog(0xb9e3df, 25, 48);
+scene.fog = new THREE.Fog(0xb9e3df, 42, 76);
 
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: "high-performance" });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
@@ -20,9 +20,9 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.08;
 root.appendChild(renderer.domElement);
 
-let viewHeight = window.innerWidth < 700 ? 25 : 18;
+let viewHeight = window.innerWidth < 700 ? 36 : 27;
 const camera = new THREE.OrthographicCamera(-10, 10, 8, -8, 0.1, 90);
-camera.position.set(12.5, 14.5, 16.5);
+camera.position.set(18, 21, 24);
 camera.lookAt(0, 0.8, 0);
 
 scene.add(new THREE.HemisphereLight(0xf8fff1, 0x6e8f57, 2.15));
@@ -43,18 +43,18 @@ character.position.set(0, 0.06, 0);
 scene.add(character);
 
 const shadow = new THREE.Mesh(
-  new THREE.CircleGeometry(0.75, 32),
+  new THREE.CircleGeometry(0.56, 32),
   new THREE.MeshBasicMaterial({ color: 0x244528, transparent: true, opacity: 0.22, depthWrite: false })
 );
 shadow.rotation.x = -Math.PI / 2;
 shadow.position.y = 0.018;
-shadow.scale.set(1.35, 0.7, 1);
+shadow.scale.set(1.22, 0.68, 1);
 character.add(shadow);
 
 const player = {
   target: new THREE.Vector3(0, 0.06, 0),
   velocity: new THREE.Vector3(),
-  speed: 3.35,
+  speed: 4.3,
   model: null,
   mixer: null,
   walkAction: null,
@@ -63,15 +63,15 @@ const player = {
 
 // Blender XY becomes Three.js X/-Z after glTF's Y-up conversion.
 const buildingColliders = [
-  { center: new THREE.Vector2(0, -6.65), radius: 2.1 },
-  { center: new THREE.Vector2(-5.76, 3.33), radius: 2.1 },
-  { center: new THREE.Vector2(5.76, 3.33), radius: 2.1 }
+  { center: new THREE.Vector2(0, -10.25), radius: 2.7 },
+  { center: new THREE.Vector2(-8.88, 5.13), radius: 2.7 },
+  { center: new THREE.Vector2(8.88, 5.13), radius: 2.7 }
 ];
 
 function keepInsideTown(position) {
   const radius = Math.hypot(position.x, position.z);
-  if (radius > 10.8) {
-    const limit = 10.8 / radius;
+  if (radius > 16.1) {
+    const limit = 16.1 / radius;
     position.x *= limit;
     position.z *= limit;
   }
@@ -117,7 +117,7 @@ loader.load("./assets/town-base.glb", (gltf) => {
 
 loader.load("./assets/naipao-walk.glb", (gltf) => {
   const model = gltf.scene;
-  model.scale.setScalar(1.9);
+  model.scale.setScalar(1.25);
   model.rotation.y = 0;
   model.traverse((node) => {
     if (!node.isMesh) return;
@@ -166,7 +166,7 @@ renderer.domElement.addEventListener("pointerup", (event) => {
 homeButton.addEventListener("click", () => player.target.set(0, 0.06, 0));
 
 const clock = new THREE.Clock();
-const cameraOffset = new THREE.Vector3(12.5, 14.5, 16.5);
+const cameraOffset = new THREE.Vector3(18, 21, 24);
 const desiredCamera = new THREE.Vector3();
 const desiredLook = new THREE.Vector3();
 const cameraFocus = new THREE.Vector3();
@@ -174,7 +174,7 @@ const nextPosition = new THREE.Vector3();
 
 function updateCameraFrustum() {
   const aspect = window.innerWidth / window.innerHeight;
-  viewHeight = window.innerWidth < 700 ? 25 : 18;
+  viewHeight = window.innerWidth < 700 ? 36 : 27;
   camera.left = -(viewHeight * aspect) / 2;
   camera.right = (viewHeight * aspect) / 2;
   camera.top = viewHeight / 2;
@@ -228,7 +228,7 @@ function animate() {
   }
   shadow.material.opacity = moving ? 0.16 : 0.22;
 
-  cameraFocus.set(character.position.x * 0.32, 0, character.position.z * 0.32);
+  cameraFocus.set(character.position.x * 0.4, 0, character.position.z * 0.4);
   desiredCamera.copy(cameraOffset).add(cameraFocus);
   camera.position.lerp(desiredCamera, 1 - Math.exp(-delta * 2.6));
   desiredLook.copy(cameraFocus).add(new THREE.Vector3(0, 0.9, 0));
