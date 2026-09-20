@@ -4,6 +4,8 @@
 
 在线体验：https://naipao-grass-town.poohtw342613.chatgpt.site
 
+GitHub Pages：https://neohoy.github.io/naipao-grass-town/
+
 ## 当前内容
 
 - 扩大后的圆形草地岛、中心广场和三栋小镇建筑
